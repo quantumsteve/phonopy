@@ -180,13 +180,14 @@ class DynamicStructureFactor:
             self.frequencies.shape, dtype="double", order="C"
         )
 
-        self._td = ThermalDisplacementMatrices(
+        td = ThermalDisplacementMatrices(
             self._mesh_phonon,
             freq_min=self._fmin,
             freq_max=self._fmax,
         )
-        self._td.temperatures = [self._T]
-
+        td.temperatures = [self._T]
+        td.run()
+        self._thermal_displacement_matrices = td.thermal_displacement_matrices[0]
 
     def __iter__(self):
         """Define iterator of calculation over q-points."""
@@ -241,14 +242,12 @@ class DynamicStructureFactor:
         self._eigvecs = qpoints_phonon.eigenvectors
 
     def _get_thermal_displacements(self, proj_dir):
-        self._td.run()
-
-        thermal_displacements = np.zeros(self._td.thermal_displacement_matrices.shape[1], dtype=float)
+        thermal_displacements = np.zeros(self._thermal_displacement_matrices.shape[0], dtype=float)
         unit_dir = proj_dir / np.linalg.norm(proj_dir)
-        proj_mat = np.outer(unit_dir, unit_dir)
+        unit_mat = np.outer(unit_dir, unit_dir)
 
-        for i, mat in enumerate(self._td.thermal_displacement_matrices[0]):
-            thermal_displacements[i] = np.sum(np.multiply(proj_mat, mat))
+        for i, thermal_mat in enumerate(self._thermal_displacement_matrices):
+            thermal_displacements[i] = np.sum(np.multiply(unit_mat, thermal_mat))
 
         return thermal_displacements
 
