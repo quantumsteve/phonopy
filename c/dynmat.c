@@ -534,7 +534,7 @@ static void get_dynmat_ij(double (*dynamical_matrix)[2],
         }
     }
 
-    for (k = num_satom*j; k < num_satom*j + num_matches; ++k) {
+    for (k = num_matches*j; k < num_matches*(j+1); ++k) {
         get_dm(dm, num_patom, num_satom, fc, q, svecs, multi, p2s_map,
                charge_sum, i, j, s2p_map[k]);
     }

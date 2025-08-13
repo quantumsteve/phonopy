@@ -102,7 +102,7 @@ void py_get_dynamical_matrices_with_dd_openmp_over_qpoints(
     nb::ndarray<> py_dynamical_matrix, nb::ndarray<> py_qpoints,
     nb::ndarray<> py_force_constants, nb::ndarray<> py_svecs,
     nb::ndarray<> py_multi, nb::ndarray<> py_positions, nb::ndarray<> py_masses,
-    nb::ndarray<> py_s2p_map, nb::ndarray<> py_p2s_map,
+    nb::ndarray<> py_s2p_map, nb::ndarray<> py_p2s_map, nb::ndarray<> py_valid_indices,
     nb::ndarray<> py_q_direction, nb::ndarray<> py_born,
     nb::ndarray<> py_dielectric, nb::ndarray<> py_reciprocal_lattice,
     double nac_factor, nb::ndarray<> py_dd_q0, nb::ndarray<> py_G_list,
@@ -124,6 +124,7 @@ void py_get_dynamical_matrices_with_dd_openmp_over_qpoints(
 
     int64_t *s2p_map;
     int64_t *p2s_map;
+    int64_t *valid_indices;
     int64_t num_patom;
     int64_t num_satom;
     int64_t num_matches;
@@ -139,6 +140,7 @@ void py_get_dynamical_matrices_with_dd_openmp_over_qpoints(
     masses = (double *)py_masses.data();
     s2p_map = (int64_t *)py_s2p_map.data();
     p2s_map = (int64_t *)py_p2s_map.data();
+    valid_indices = (int64_t *)py_valid_indices.data();
     born = (double (*)[3][3])py_born.data();
     dielectric = (double (*)[3])py_dielectric.data();
     reciprocal_lattice = (double (*)[3])py_reciprocal_lattice.data();
@@ -163,11 +165,11 @@ void py_get_dynamical_matrices_with_dd_openmp_over_qpoints(
 
     num_patom = py_p2s_map.shape(0);
     num_satom = py_s2p_map.shape(0);
-    num_matches = py_s2p_map.shape(1);
+    num_matches = py_valid_indices.shape(1);
 
     phpy_dynamical_matrices_with_dd_openmp_over_qpoints(
         dm, qpoints, n_qpoints, fc, svecs, multi, positions, num_patom,
-        num_satom, num_matches, masses, p2s_map, s2p_map, born, dielectric,
+        num_satom, num_matches, masses, p2s_map, valid_indices, born, dielectric,
         reciprocal_lattice, q_direction, nac_factor, dd_q0, G_list, n_Gpoints,
         lambda, use_Wang_NAC, hermitianize);
 }

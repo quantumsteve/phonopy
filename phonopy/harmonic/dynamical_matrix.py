@@ -1118,12 +1118,12 @@ def run_dynamical_matrix_solver_c(
     p2s, s2p = _get_fc_elements_mapping(dm, fc)
 
     valid_indices = []
-    for j in range(len(_p2s)):
+    for j in range(len(p2s)):
         valid_indices.append([])
-        for k in range(len(_s2p)):
-            if _s2p[k] == _p2s[j]:
+        for k in range(len(s2p)):
+            if s2p[k] == p2s[j]:
                 valid_indices[j].append(k)
-    s2p = np.array(valid_indices, dtype=np.int64)
+    valid_indices = np.array(valid_indices, dtype=np.int64)
 
     dtype_complex = "c%d" % (np.dtype("double").itemsize * 2)
     dynmat = np.zeros(
@@ -1140,6 +1140,7 @@ def run_dynamical_matrix_solver_c(
         masses,
         s2p,
         p2s,
+        valid_indices,
         _nac_q_direction,
         born,
         dielectric,
