@@ -126,6 +126,7 @@ void py_get_dynamical_matrices_with_dd_openmp_over_qpoints(
     int64_t *p2s_map;
     int64_t num_patom;
     int64_t num_satom;
+    int64_t num_matches;
     int64_t n_qpoints;
     int64_t n_Gpoints;
 
@@ -162,10 +163,11 @@ void py_get_dynamical_matrices_with_dd_openmp_over_qpoints(
 
     num_patom = py_p2s_map.shape(0);
     num_satom = py_s2p_map.shape(0);
+    num_matches = py_s2p_map.shape(1);
 
     phpy_dynamical_matrices_with_dd_openmp_over_qpoints(
         dm, qpoints, n_qpoints, fc, svecs, multi, positions, num_patom,
-        num_satom, masses, p2s_map, s2p_map, born, dielectric,
+        num_satom, num_matches, masses, p2s_map, s2p_map, born, dielectric,
         reciprocal_lattice, q_direction, nac_factor, dd_q0, G_list, n_Gpoints,
         lambda, use_Wang_NAC, hermitianize);
 }

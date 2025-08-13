@@ -42,7 +42,7 @@
 
 static int64_t get_dynamical_matrix_at_q(
     double (*dynamical_matrix)[2], const int64_t num_patom,
-    const int64_t num_satom, const double *fc, const double q[3],
+    const int64_t num_satom, const int64_t num_matches, const double *fc, const double q[3],
     const double (*svecs)[3], const int64_t (*multi)[2], const double *mass,
     const int64_t *s2p_map, const int64_t *p2s_map,
     const double (*charge_sum)[3][3], const int64_t hermitianize,
@@ -56,7 +56,7 @@ static void add_dynmat_dd_at_q(
     const double (*G_list)[3], const int64_t num_G_points, const double lambda,
     const double tolerance);
 static void get_dynmat_ij(double (*dynamical_matrix)[2],
-                          const int64_t num_patom, const int64_t num_satom,
+                          const int64_t num_patom, const int64_t num_satom, const int64_t num_matches,
                           const double *fc, const double q[3],
                           const double (*svecs)[3], const int64_t (*multi)[2],
                           const double *mass, const int64_t *s2p_map,
@@ -102,7 +102,7 @@ static void get_q_cart(double q_cart[3], const double q[3],
 static void get_dynmat_wang(
     double (*dynamical_matrices)[2], const double qpoint[3], const double *fc,
     const double (*svecs)[3], const int64_t (*multi)[2],
-    const int64_t num_patom, const int64_t num_satom, const double *masses,
+    const int64_t num_patom, const int64_t num_satom, const int64_t num_matches, const double *masses,
     const int64_t *p2s_map, const int64_t *s2p_map, const double (*born)[3][3],
     const double dielectric[3][3], const double (*reciprocal_lattice)[3],
     const double *q_direction, const double *q_dir_cart,
@@ -119,7 +119,7 @@ int64_t dym_dynamical_matrices_with_dd_openmp_over_qpoints(
     double (*dynamical_matrices)[2], const double (*qpoints)[3],
     const int64_t n_qpoints, const double *fc, const double (*svecs)[3],
     const int64_t (*multi)[2], const double (*positions)[3],
-    const int64_t num_patom, const int64_t num_satom, const double *masses,
+    const int64_t num_patom, const int64_t num_satom, const int64_t num_matches, const double *masses,
     const int64_t *p2s_map, const int64_t *s2p_map, const double (*born)[3][3],
     const double dielectric[3][3], const double (*reciprocal_lattice)[3],
     const double *q_direction, const double nac_factor,
@@ -145,7 +145,7 @@ int64_t dym_dynamical_matrices_with_dd_openmp_over_qpoints(
 #endif
         for (i = 0; i < n_qpoints; i++) {
             get_dynmat_wang(dynamical_matrices + adrs_shift * i, qpoints[i], fc,
-                            svecs, multi, num_patom, num_satom, masses, p2s_map,
+                            svecs, multi, num_patom, num_satom, num_matches, masses, p2s_map,
                             s2p_map, born, dielectric, reciprocal_lattice,
                             q_direction, q_dir_cart, nac_factor,
                             q_zero_tolerance, hermitianize);
@@ -156,7 +156,7 @@ int64_t dym_dynamical_matrices_with_dd_openmp_over_qpoints(
 #endif
         for (i = 0; i < n_qpoints; i++) {
             get_dynamical_matrix_at_q(dynamical_matrices + adrs_shift * i,
-                                      num_patom, num_satom, fc, qpoints[i],
+                                      num_patom, num_satom, num_matches, fc, qpoints[i],
                                       svecs, multi, masses, s2p_map, p2s_map,
                                       NULL, hermitianize, 0);
             if (dd_q0) {  // NAC by Gonze and Lee if dd_in is not NULL
@@ -179,7 +179,7 @@ int64_t dym_dynamical_matrices_with_dd_openmp_over_qpoints(
 static void get_dynmat_wang(
     double (*dynamical_matrices)[2], const double qpoint[3], const double *fc,
     const double (*svecs)[3], const int64_t (*multi)[2],
-    const int64_t num_patom, const int64_t num_satom, const double *masses,
+    const int64_t num_patom, const int64_t num_satom, const int64_t num_matches, const double *masses,
     const int64_t *p2s_map, const int64_t *s2p_map, const double (*born)[3][3],
     const double dielectric[3][3], const double (*reciprocal_lattice)[3],
     const double *q_direction, const double *q_dir_cart,
@@ -205,12 +205,12 @@ static void get_dynmat_wang(
                 charge_sum, num_patom,
                 nac_factor / n / get_dielectric_part(q_dir_cart, dielectric),
                 q_dir_cart, born);
-            get_dynamical_matrix_at_q(dynamical_matrices, num_patom, num_satom,
+            get_dynamical_matrix_at_q(dynamical_matrices, num_patom, num_satom, num_matches,
                                       fc, qpoint, svecs, multi, masses, s2p_map,
                                       p2s_map, charge_sum, hermitianize, 0);
 
         } else {
-            get_dynamical_matrix_at_q(dynamical_matrices, num_patom, num_satom,
+            get_dynamical_matrix_at_q(dynamical_matrices, num_patom, num_satom, num_matches,
                                       fc, qpoint, svecs, multi, masses, s2p_map,
                                       p2s_map, NULL, hermitianize, 0);
         }
@@ -219,7 +219,7 @@ static void get_dynmat_wang(
             charge_sum, num_patom,
             nac_factor / n / get_dielectric_part(q_cart, dielectric), q_cart,
             born);
-        get_dynamical_matrix_at_q(dynamical_matrices, num_patom, num_satom, fc,
+        get_dynamical_matrix_at_q(dynamical_matrices, num_patom, num_satom, num_matches, fc,
                                   qpoint, svecs, multi, masses, s2p_map,
                                   p2s_map, charge_sum, hermitianize, 0);
     }
@@ -478,7 +478,7 @@ void dym_transform_dynmat_to_fc(
 /// @brief charge_sum is NULL if G-L NAC or no-NAC.
 static int64_t get_dynamical_matrix_at_q(
     double (*dynamical_matrix)[2], const int64_t num_patom,
-    const int64_t num_satom, const double *fc, const double q[3],
+    const int64_t num_satom, const int64_t num_matches, const double *fc, const double q[3],
     const double (*svecs)[3], const int64_t (*multi)[2], const double *mass,
     const int64_t *s2p_map, const int64_t *p2s_map,
     const double (*charge_sum)[3][3], const int64_t hermitianize,
@@ -490,7 +490,7 @@ static int64_t get_dynamical_matrix_at_q(
 #pragma omp parallel for
 #endif
         for (ij = 0; ij < num_patom * num_patom; ij++) {
-            get_dynmat_ij(dynamical_matrix, num_patom, num_satom, fc, q, svecs,
+            get_dynmat_ij(dynamical_matrix, num_patom, num_satom, num_matches, fc, q, svecs,
                           multi, mass, s2p_map, p2s_map, charge_sum,
                           ij / num_patom,  /* i */
                           ij % num_patom); /* j */
@@ -498,7 +498,7 @@ static int64_t get_dynamical_matrix_at_q(
     } else {
         for (i = 0; i < num_patom; i++) {
             for (j = 0; j < num_patom; j++) {
-                get_dynmat_ij(dynamical_matrix, num_patom, num_satom, fc, q,
+                get_dynmat_ij(dynamical_matrix, num_patom, num_satom, num_matches, fc, q,
                               svecs, multi, mass, s2p_map, p2s_map, charge_sum,
                               i, j);
             }
@@ -514,7 +514,7 @@ static int64_t get_dynamical_matrix_at_q(
 
 /// @brief charge_sum is NULL if G-L NAC or no-NAC.
 static void get_dynmat_ij(double (*dynamical_matrix)[2],
-                          const int64_t num_patom, const int64_t num_satom,
+                          const int64_t num_patom, const int64_t num_satom, const int64_t num_matches,
                           const double *fc, const double q[3],
                           const double (*svecs)[3], const int64_t (*multi)[2],
                           const double *mass, const int64_t *s2p_map,
@@ -534,12 +534,9 @@ static void get_dynmat_ij(double (*dynamical_matrix)[2],
         }
     }
 
-    for (k = 0; k < num_satom; k++) { /* Lattice points of right index of fc */
-        if (s2p_map[k] != p2s_map[j]) {
-            continue;
-        }
+    for (k = num_satom*j; k < num_satom*j + num_matches; ++k) {
         get_dm(dm, num_patom, num_satom, fc, q, svecs, multi, p2s_map,
-               charge_sum, i, j, k);
+               charge_sum, i, j, s2p_map[k]);
     }
 
     for (k = 0; k < 3; k++) {

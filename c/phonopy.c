@@ -85,7 +85,7 @@ int64_t phpy_dynamical_matrices_with_dd_openmp_over_qpoints(
     double (*dynamical_matrices)[2], const double (*qpoints)[3],
     const int64_t n_qpoints, const double *fc, const double (*svecs)[3],
     const int64_t (*multi)[2], const double (*positions)[3],
-    const int64_t num_patom, const int64_t num_satom, const double *masses,
+    const int64_t num_patom, const int64_t num_satom, const int64_t num_matches, const double *masses,
     const int64_t *p2s_map, const int64_t *s2p_map, const double (*born)[3][3],
     const double dielectric[3][3], const double (*reciprocal_lattice)[3],
     const double *q_direction, const double nac_factor,
@@ -94,7 +94,7 @@ int64_t phpy_dynamical_matrices_with_dd_openmp_over_qpoints(
     const int64_t hermitianize) {
     return dym_dynamical_matrices_with_dd_openmp_over_qpoints(
         dynamical_matrices, qpoints, n_qpoints, fc, svecs, multi, positions,
-        num_patom, num_satom, masses, p2s_map, s2p_map, born, dielectric,
+        num_patom, num_satom, num_matches, masses, p2s_map, s2p_map, born, dielectric,
         reciprocal_lattice, q_direction, nac_factor, dd_q0, G_list,
         num_G_points, lambda, use_Wang_NAC, hermitianize);
 }

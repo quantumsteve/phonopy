@@ -1117,6 +1117,14 @@ def run_dynamical_matrix_solver_c(
 
     p2s, s2p = _get_fc_elements_mapping(dm, fc)
 
+    valid_indices = []
+    for j in range(len(_p2s)):
+        valid_indices.append([])
+        for k in range(len(_s2p)):
+            if _s2p[k] == _p2s[j]:
+                valid_indices[j].append(k)
+    s2p = np.array(valid_indices, dtype=np.int64)
+
     dtype_complex = "c%d" % (np.dtype("double").itemsize * 2)
     dynmat = np.zeros(
         (len(qpoints), len(p2s) * 3, len(p2s) * 3), dtype=dtype_complex, order="C"
