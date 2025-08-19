@@ -59,7 +59,7 @@ static void get_dynmat_ij(double (*dynamical_matrix)[2],
                           const int64_t num_patom, const int64_t num_satom, const int64_t num_matches,
                           const double *fc, const double q[3],
                           const double (*svecs)[3], const int64_t (*multi)[2],
-                          const double *mass, const int64_t **s2p_map,
+                          const double *mass, const int64_t *s2p_map,
                           const int64_t *p2s_map,
                           const double (*charge_sum)[3][3], const int64_t i,
                           const int64_t j);
@@ -490,16 +490,17 @@ static int64_t get_dynamical_matrix_at_q(
 #pragma omp parallel for
 #endif
         for (ij = 0; ij < num_patom * num_patom; ij++) {
+            int64_t j = ij % num_patom;
             get_dynmat_ij(dynamical_matrix, num_patom, num_satom, num_matches, fc, q, svecs,
-                          multi, mass, s2p_map, p2s_map, charge_sum,
+                          multi, mass, s2p_map[j], p2s_map, charge_sum,
                           ij / num_patom,  /* i */
-                          ij % num_patom); /* j */
+                          j);
         }
     } else {
         for (i = 0; i < num_patom; i++) {
             for (j = 0; j < num_patom; j++) {
                 get_dynmat_ij(dynamical_matrix, num_patom, num_satom, num_matches, fc, q,
-                              svecs, multi, mass, s2p_map, p2s_map, charge_sum,
+                              svecs, multi, mass, s2p_map[j], p2s_map, charge_sum,
                               i, j);
             }
         }
@@ -517,7 +518,7 @@ static void get_dynmat_ij(double (*dynamical_matrix)[2],
                           const int64_t num_patom, const int64_t num_satom, const int64_t num_matches,
                           const double *fc, const double q[3],
                           const double (*svecs)[3], const int64_t (*multi)[2],
-                          const double *mass, const int64_t **s2p_map,
+                          const double *mass, const int64_t *s2p_map,
                           const int64_t *p2s_map,
                           const double (*charge_sum)[3][3], const int64_t i,
                           const int64_t j) {
@@ -534,9 +535,8 @@ static void get_dynmat_ij(double (*dynamical_matrix)[2],
         }
     }
 
-    const int64_t *asdf = s2p_map[k];
-    for (k = 0; k < asdf[0]; ++k) {
-        for (l = asdf[2*k+1]; l < asdf[2*k+2]; ++l) {
+    for (k = 0; k < s2p_map[0]; ++k) {
+        for (l = s2p_map[2*k+1]; l < s2p_map[2*k+2]; ++l) {
             get_dm(dm, num_patom, num_satom, fc, q, svecs, multi, p2s_map,
                    charge_sum, i, j, l);
 	}
