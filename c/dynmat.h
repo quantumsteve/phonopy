@@ -42,7 +42,7 @@ int64_t dym_dynamical_matrices_with_dd_openmp_over_qpoints(
     const int64_t n_qpoints, const double *fc, const double (*svecs)[3],
     const int64_t (*multi)[2], const double (*positions)[3],
     const int64_t num_patom, const int64_t num_satom, const int64_t num_matches, const double *masses,
-    const int64_t *p2s_map, const int64_t *s2p_map, const double (*born)[3][3],
+    const int64_t *p2s_map, const int64_t **s2p_map, const double (*born)[3][3],
     const double dielectric[3][3], const double (*reciprocal_lattice)[3],
     const double *q_direction, const double nac_factor,
     const double (*dd_q0)[2], const double (*G_list)[3],

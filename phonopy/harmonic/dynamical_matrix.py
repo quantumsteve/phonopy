@@ -1117,6 +1117,9 @@ def run_dynamical_matrix_solver_c(
 
     p2s, s2p = _get_fc_elements_mapping(dm, fc)
 
+    import time
+
+    start = time.time()
     valid_indices = []
     for j in range(len(p2s)):
         valid_indices.append([])
@@ -1124,7 +1127,14 @@ def run_dynamical_matrix_solver_c(
             if s2p[k] == p2s[j]:
                 valid_indices[j].append(k)
     valid_indices = np.array(valid_indices, dtype=np.int64)
+    end = time.time()
+    length = end - start
 
+    # Show the results : this can be altered however you like
+    print("It took", length, "seconds!")
+
+    print(len(s2p),len(p2s),valid_indices)
+    
     dtype_complex = "c%d" % (np.dtype("double").itemsize * 2)
     dynmat = np.zeros(
         (len(qpoints), len(p2s) * 3, len(p2s) * 3), dtype=dtype_complex, order="C"

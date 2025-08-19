@@ -4,6 +4,8 @@
 
 #include "phonopy.h"
 
+#include <vector>
+
 namespace nb = nanobind;
 
 void py_transform_dynmat_to_fc(
@@ -124,6 +126,11 @@ void py_get_dynamical_matrices_with_dd_openmp_over_qpoints(
 
     int64_t *s2p_map;
     int64_t *p2s_map;
+    std::vector<int64_t> tmp {3,0,8,18,27,36,45,
+	                      3,9,18,27,36,45,54,
+			      1,54,81,
+			      1,81,107};
+    std::vector<const int64_t*> tmp_map = {tmp.data(), tmp.data() + 7, tmp.data() + 14, tmp.data() + 17};
     int64_t *valid_indices;
     int64_t num_patom;
     int64_t num_satom;
@@ -169,7 +176,7 @@ void py_get_dynamical_matrices_with_dd_openmp_over_qpoints(
 
     phpy_dynamical_matrices_with_dd_openmp_over_qpoints(
         dm, qpoints, n_qpoints, fc, svecs, multi, positions, num_patom,
-        num_satom, num_matches, masses, p2s_map, valid_indices, born, dielectric,
+        num_satom, num_matches, masses, p2s_map, tmp_map.data(), born, dielectric,
         reciprocal_lattice, q_direction, nac_factor, dd_q0, G_list, n_Gpoints,
         lambda, use_Wang_NAC, hermitianize);
 }
